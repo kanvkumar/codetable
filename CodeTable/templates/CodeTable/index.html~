@@ -1,0 +1,190 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<title>CodeTable | Online Code Editor, Compiler &amp; Interpreter</title>
+        
+        <meta name="author" content="kanvkumar" />
+
+	<!-- Stylesheets -->
+	<link rel="stylesheet" type="text/css" href="{% static 'CodeTable/css/bootstrap.min.css' %}" />
+	<link rel="stylesheet" type="text/css" href="{% static 'CodeTable/css/custom.css' %}" />
+
+    </head>
+    <body>
+
+        <!-- Hidden input field containing CSRF token required for making AJAX calls to Django -->
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}" />
+
+		<nav class="navbar navbar-default" style="background-color: rgb(0, 0, 51);">
+			<div class="container">
+				<div class="navbar-header">
+					<a class="navbar-brand" href="/"> <b>CodeTable</b> </a>
+				</div>
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="/"> <b>New Code</b> </a></li>
+					<li><a href="https://github.com/HackerEarth/hackerearth.vim""> <b>Vim Plugin</b> </a></li>
+				</ul>
+			</div>
+		</nav>
+
+    	<div class="container">
+
+    		<div class="row">
+
+    			<div class="left col-md-12">
+
+    				<div id="editor-topbar">
+
+    					<div class="lang-choose">
+
+							<select class="form-control" name="lang" id="lang">
+								<option value="C">C (gcc 4.8.1)</option>
+								<option value="CPP" selected>C++ (g++ 4.8.1)</option>
+								<option value="CSHARP">C#</option>
+								<option value="CLOJURE">Clojure (clojure 1.1.0)</option>
+								<option value="CSS">CSS</option>
+								<option value="HASKELL">Haskell (ghc 7.4.1)</option>
+								<option value="JAVA">Java (openjdk 1.7.0_09)</option>
+								<option value="JAVASCRIPT">JavaScript</option>
+								<option value="OBJECTIVEC">Objective-C (clang 3.3)</option>
+								<option value="PERL">Perl (perl 5.14.2)</option>
+								<option value="PHP">PHP (php 5.3.10)</option>
+								<option value="PYTHON">Python (python 2.7.3)</option>
+								<option value="R">R (RScript 2.14.1)</option>
+								<option value="RUBY">Ruby (ruby 2.1.1)</option>
+								<option value="RUST">Rust (rustc 1.4.0)</option>
+								<option value="SCALA">Scala (scalac 2.9.1)</option>
+							</select>
+
+						</div> <!-- END of lang-choose -->
+
+						<div id="settings">
+
+							<a class="cursor no-select" id="download-code">
+								<span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+							</a>
+							
+							<a class="cursor no-select" id="show-settings">
+								<span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+							</a>
+							
+							<div id="settings-pane">
+								<div id="inner-settings-pane"></div>
+								<label>Editor Theme</label>
+								<select class="form-control" name="editor-theme" id="editor-theme">
+									<option value="LIGHT">Light</option>
+									<option value="DARK" selected>Dark</option>
+								</select>
+								<label>Indent Spaces</label>
+								<input class="form-control" name="indent-spaces" id="indent-spaces" type="text" value="4">
+							</div>
+
+						</div> <!-- END of settings-pane -->
+
+    				</div> <!-- END of editor-topbar -->
+    				
+    				<pre id="editor"></pre>
+
+    				<div id="editor-statusbar"></div>
+
+    			</div>
+
+    			<div class="right col-md-4">
+                    
+                </div>
+
+    		</div> <!-- END of row -->
+
+    		<div class="row">
+    			<div class="col-md-12 right" id="show-results">
+    				<div class="pull-left custom-input-panel">
+						<div class="checkbox">
+							<label>
+								<input type="checkbox" id="custom-input-checkbox"> Use custom input to test the code.
+							</label>
+						</div>
+    				</div>
+    				<div class="pull-right run-save-panel">
+	    				<button class="btn btn-info" id="compile-code" data-toggle="tooltip" data-placement="top" title="Press Shift+Enter">Compile it!</button>
+	    				<button class="btn btn-success" id="run-code" data-toggle="tooltip" data-placement="top" title="Press Ctrl+Enter">Run it!</button>
+	    			</div>
+    			</div>
+    		</div> <!-- END of row -->
+
+    		<div class="row">
+    			<div class="col-md-12 right">
+	    			<!-- custom input textarea -->
+					<div class="custom-input-container">
+						<textarea id="custom-input" class="nice-textarea" placeholder="Custom input"></textarea>
+					</div>
+			</div>
+    		</div> <!-- END of row -->
+
+    		<div class="row">
+    			<div class="col-md-12 right">
+    				<div class="output-response-box">
+    					<div class="output-details">
+    						<div class="output-details-info run-status">
+    							<div class="key">Run Status:</div>
+    							<div class="value"></div>
+    						</div>
+    						<div class="output-details-info compile-status">
+    							<div class="key">Compile Status:</div>
+    							<div class="value"></div>
+    						</div>
+    						<div class="output-details-info time-sec">
+    							<div class="key">Time (sec):</div>
+    							<div class="value"></div>
+    						</div>
+    						<div class="output-details-info memory-kb">
+    							<div class="key">Memory (KB):</div>
+    							<div class="value"></div>
+    						</div>
+    					</div>
+
+    					<div class="output-io">
+                            <div class="output-error-box">
+                                <div class="error-key"></div>
+                                <pre class="error-message"></pre>
+                            </div>
+    						<div class="output-io-info output-i-info">
+    							<div class="key">Input (stdin)</div>
+    							<pre class="output-text output-i"> </pre>
+    							<span class="output-empty-message output-i-message"><i>Standard input is empty</i></span>
+    						</div>
+    						<div class="output-io-info output-o-info">
+    							<div class="key">Output (stdout)</div>
+    							<pre class="output-text output-o"> </pre>
+    							<span class="output-empty-message output-o-message"><i>Standard output is empty</i></span>
+    						</div>
+    					</div>
+    				</div>
+    			</div>
+    		</div>
+
+    	</div> <!-- END of container -->
+
+
+    	<footer class="container">
+    		<span class="pull-left"> Powered by <a href="https://www.hackerearth.com/docs/api/developers/code/v3/" target="_blank"> <b>HackerEarth API</b> </a> </span>
+    		<span class="pull-right"> Copyrights © <a href="https://github.com/kanvkumar" target="_blank">Kanv Kumar</a> 2016 | Made with <span style="color: #f7403a">&hearts;</span> in <b>India</b> </span>
+    	</footer>
+
+    	<!-- jQuery -->
+    	<script src="{% static 'CodeTable/js/jquery.min.js' %}" type="text/javascript" charset="utf-8"></script>
+
+    	<!-- Bootstrap (including all individual files below) -->
+	<script src="{% static 'CodeTable/js/bootstrap.min.js' %}" type="text/javascript" charset="utf-8"></script>
+    	<script src="{% static 'CodeTable/js/custom.js' %}" type="text/javascript" charset="utf-8"></script>
+    	<script src="{% static 'CodeTable/ace-builds/src/ace.js' %}" type="text/javascript" charset="utf-8"></script>
+    	<script src="{% static 'CodeTable/ace-builds/src/ext-statusbar.js' %}" type="text/javascript" charset="utf-8"></script>
+    	<script src="{% static 'CodeTable/ace-builds/src/ext-language_tools.js' %}" type="text/javascript" charset="utf-8"></script>
+
+    </body>
+</html>
